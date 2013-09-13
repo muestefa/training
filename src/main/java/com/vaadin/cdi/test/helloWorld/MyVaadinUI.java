@@ -78,6 +78,8 @@ public class MyVaadinUI extends UI implements MessageListener {
 	}
 
 	
+	
+	
 	protected void addMessage(String message) {
 		sender.sendTextMessage(message);
 	}
