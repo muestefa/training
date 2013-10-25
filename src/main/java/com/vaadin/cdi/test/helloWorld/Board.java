@@ -24,7 +24,6 @@ public class Board implements Serializable {
 	
 	public void addMessage(String message) {
 		messages.add(message);
-		senderService.sendTextMessage(message);
 		for (MessageListener listener : listeners) {
 			listener.messageAdded(message);
 		}

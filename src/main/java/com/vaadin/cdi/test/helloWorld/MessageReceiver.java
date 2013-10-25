@@ -26,6 +26,8 @@ public class MessageReceiver implements MessageListener {
 			globalState.addMessage(message.getText());
 		} catch (JMSException e) {
 			LOG.error("sending failed", e);
+		} catch (RuntimeException re) {
+			LOG.error("sending failed, re");
 		}
 	}
 
