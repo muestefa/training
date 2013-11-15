@@ -11,11 +11,10 @@ import com.vaadin.annotations.Push;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.test.factory.Margin;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -39,8 +38,11 @@ public class MyVaadinUI extends UI implements MessageListener {
 	@Inject
 	@Margin
 	private VerticalLayout messageLayout;
+	@Inject
+	@Margin
+	private VerticalLayout inputLayout;
+
 	private TextField input;
-	private Label messages;
 
 	@PostConstruct
 	public void init() {
@@ -54,15 +56,26 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	@Override
 	protected void init(VaadinRequest request) {
-
 		setContent(outerLayout);
 
 		outerLayout.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+		outerLayout.setSizeFull();
 
 		outerLayout.addComponent(messageLayout);
-		input = new TextField();
-		outerLayout.addComponent(input);
+		outerLayout.addComponent(inputLayout);
+		outerLayout.setExpandRatio(messageLayout, 1.0f);
 
+		createInput();
+
+		messageLayout.setSizeFull();
+		VerticalLayout dummyLayout = new VerticalLayout();
+		messageLayout.addComponent(dummyLayout);
+		messageLayout.setExpandRatio(dummyLayout, 1.0f);
+		rebuildMessages();
+	}
+
+	private void createInput() {
+		input = new TextField();
 		Button button = new Button("Abschicken");
 		button.addClickListener(new Button.ClickListener() {
 			public void buttonClick(ClickEvent event) {
@@ -70,23 +83,25 @@ public class MyVaadinUI extends UI implements MessageListener {
 				input.setValue("");
 			}
 		});
-		outerLayout.addComponent(button);
-
-		messages = new Label(createLabelText(), ContentMode.TEXT);
-		messageLayout.addComponent(messages);
+		inputLayout.addComponent(input);
+		inputLayout.addComponent(button);
 	}
 
-	private String createLabelText() {
+	private String rebuildMessages() {
 		StringBuilder builder = new StringBuilder();
 		for (String message: globalState.getMessages()) {
-			builder.append(message).append("\n");
+			addMessageToView(message);
 		}
 		return builder.toString();
 	}
 
-	
-	
-	
+	private void addMessageToView(String message) {
+		TextArea area = new TextArea();
+		area.setValue(message);
+		area.setReadOnly(true);
+		messageLayout.addComponent(area);
+	}
+
 	protected void addMessage(String message) {
 		sender.sendTextMessage(message);
 	}
@@ -97,7 +112,7 @@ public class MyVaadinUI extends UI implements MessageListener {
 		access(new Runnable() {
 			@Override
 			public void run() {
-				messages.setValue(messages.getValue() + "\n" + message);
+				addMessageToView(message);
 				push();
 			}
 		});
