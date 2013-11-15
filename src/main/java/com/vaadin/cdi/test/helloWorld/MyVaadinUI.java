@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.annotations.Push;
 import com.vaadin.cdi.CDIUI;
+import com.vaadin.cdi.test.factory.Margin;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
@@ -30,10 +32,13 @@ public class MyVaadinUI extends UI implements MessageListener {
 	@Inject
 	private Board globalState;
 	@Inject
-	private UIState uiState;
-	@Inject
 	private MessageSender sender;
-	private VerticalLayout layout;
+	@Inject
+	@Margin
+	private VerticalLayout outerLayout;
+	@Inject
+	@Margin
+	private VerticalLayout messageLayout;
 	private TextField input;
 	private Label messages;
 
@@ -49,12 +54,14 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	@Override
 	protected void init(VaadinRequest request) {
-		layout = new VerticalLayout();
-		layout.setMargin(true);
-		setContent(layout);
 
+		setContent(outerLayout);
+
+		outerLayout.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
+
+		outerLayout.addComponent(messageLayout);
 		input = new TextField();
-		layout.addComponent(input);
+		outerLayout.addComponent(input);
 
 		Button button = new Button("Abschicken");
 		button.addClickListener(new Button.ClickListener() {
@@ -63,10 +70,10 @@ public class MyVaadinUI extends UI implements MessageListener {
 				input.setValue("");
 			}
 		});
-		layout.addComponent(button);
+		outerLayout.addComponent(button);
 
 		messages = new Label(createLabelText(), ContentMode.TEXT);
-		layout.addComponent(messages);
+		messageLayout.addComponent(messages);
 	}
 
 	private String createLabelText() {
