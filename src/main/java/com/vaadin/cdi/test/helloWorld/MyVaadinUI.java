@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.annotations.Push;
 import com.vaadin.cdi.CDIUI;
-import com.vaadin.cdi.test.factory.Margin;
+import com.vaadin.cdi.test.annotations.ComponentProperties;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -33,14 +34,16 @@ public class MyVaadinUI extends UI implements MessageListener {
 	@Inject
 	private MessageSender sender;
 	@Inject
-	@Margin
+	@ComponentProperties(margin = false)
 	private VerticalLayout outerLayout;
 	@Inject
-	@Margin
+	@ComponentProperties(margin = false, additionalStyles = "message")
 	private VerticalLayout messageLayout;
 	@Inject
-	@Margin
+	@ComponentProperties(margin = false, additionalStyles = "messageinput")
 	private VerticalLayout inputLayout;
+
+	private Panel messagePanel = new Panel();
 
 	private TextField input;
 
@@ -60,14 +63,15 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 		outerLayout.setDefaultComponentAlignment(Alignment.BOTTOM_LEFT);
 		outerLayout.setSizeFull();
-
-		outerLayout.addComponent(messageLayout);
+		messagePanel.setContent(messageLayout);
+		messagePanel.setStyleName("panel");
+		messagePanel.setHeight("100%");
+		outerLayout.addComponent(messagePanel);
 		outerLayout.addComponent(inputLayout);
-		outerLayout.setExpandRatio(messageLayout, 1.0f);
+		outerLayout.setExpandRatio(messagePanel, 1.0f);
 
 		createInput();
 
-		messageLayout.setSizeFull();
 		VerticalLayout dummyLayout = new VerticalLayout();
 		messageLayout.addComponent(dummyLayout);
 		messageLayout.setExpandRatio(dummyLayout, 1.0f);
