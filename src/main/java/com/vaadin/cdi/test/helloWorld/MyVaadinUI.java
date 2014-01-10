@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.annotations.Push;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.test.annotations.ComponentProperties;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -47,6 +50,8 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	private TextField input;
 
+	private Button addButton;
+
 	@PostConstruct
 	public void init() {
 		globalState.registerListener(this);
@@ -80,15 +85,29 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	private void createInput() {
 		input = new TextField();
-		Button button = new Button("Abschicken");
-		button.addClickListener(new Button.ClickListener() {
+		addButton = new Button("Abschicken");
+		addButton.addClickListener(new Button.ClickListener() {
 			public void buttonClick(ClickEvent event) {
 				addMessage(input.getValue());
 				input.setValue("");
+				addButton.setEnabled(false);
+				input.focus();
 			}
 		});
+		addButton.setEnabled(false);
 		inputLayout.addComponent(input);
-		inputLayout.addComponent(button);
+		inputLayout.addComponent(addButton);
+		input.setTextChangeEventMode(TextChangeEventMode.EAGER);
+		input.addTextChangeListener(new FieldEvents.TextChangeListener() {
+			@Override
+			public void textChange(TextChangeEvent event) {
+				if(event.getText().trim().isEmpty()) {
+					addButton.setEnabled(false);
+				} else {
+					addButton.setEnabled(true);
+				}
+			}
+		});
 	}
 
 	private String rebuildMessages() {
@@ -104,6 +123,7 @@ public class MyVaadinUI extends UI implements MessageListener {
 		area.setValue(message);
 		area.setReadOnly(true);
 		messageLayout.addComponent(area);
+		messagePanel.setScrollTop(1000000);
 	}
 
 	protected void addMessage(String message) {
