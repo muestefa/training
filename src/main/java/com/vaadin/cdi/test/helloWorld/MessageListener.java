@@ -4,6 +4,6 @@ import javax.enterprise.event.Observes;
 
 public interface MessageListener {
 
-	public abstract void messageAdded(@Observes String message);
+	public abstract void messageAdded(@Observes BoardMessage boardMessage);
 
 }

@@ -17,6 +17,8 @@ import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -45,6 +47,7 @@ public class MyVaadinUI extends UI implements MessageListener {
 	@Inject
 	@ComponentProperties(margin = false, additionalStyles = "messageinput")
 	private VerticalLayout inputLayout;
+
 
 	private Panel messagePanel = new Panel();
 
@@ -112,17 +115,21 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	private String rebuildMessages() {
 		StringBuilder builder = new StringBuilder();
-		for (String message: globalState.getMessages()) {
-			addMessageToView(message);
+		for (BoardMessage message: globalState.getMessages()) {
+			addMessageToView(message.getMessage(), message.getSenderId());
 		}
 		return builder.toString();
 	}
 
-	private void addMessageToView(String message) {
+	private void addMessageToView(String message, String senderID) {
+		HorizontalLayout messageBox = new HorizontalLayout();
+		messageBox.setMargin(true);
 		TextArea area = new TextArea();
 		area.setValue(message);
 		area.setReadOnly(true);
-		messageLayout.addComponent(area);
+		messageBox.addComponent(new Label(senderID + ": "));
+		messageBox.addComponent(area);
+		messageLayout.addComponent(messageBox);
 		messagePanel.setScrollTop(1000000);
 	}
 
@@ -131,12 +138,12 @@ public class MyVaadinUI extends UI implements MessageListener {
 	}
 
 	@Override
-	public void messageAdded(final String message) {
-		LOG.debug("received: " + message);
+	public void messageAdded(final BoardMessage message) {
+		LOG.debug("received: " + message.getMessage());
 		access(new Runnable() {
 			@Override
 			public void run() {
-				addMessageToView(message);
+				addMessageToView(message.getMessage(), message.getSenderId());
 				push();
 			}
 		});
