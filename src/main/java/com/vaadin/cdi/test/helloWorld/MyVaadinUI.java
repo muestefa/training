@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.annotations.Push;
+import com.vaadin.annotations.Theme;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.test.annotations.ComponentProperties;
 import com.vaadin.event.FieldEvents;
@@ -31,6 +32,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @CDIUI
 @Push
+@Theme("smutalk")
 public class MyVaadinUI extends UI implements MessageListener {
 	private static final Logger LOG = LoggerFactory.getLogger(MyVaadinUI.class);
 
@@ -42,10 +44,10 @@ public class MyVaadinUI extends UI implements MessageListener {
 	@ComponentProperties(margin = false)
 	private VerticalLayout outerLayout;
 	@Inject
-	@ComponentProperties(margin = false, additionalStyles = "message")
+	@ComponentProperties(margin = true, additionalStyles = "messagebox")
 	private VerticalLayout messageLayout;
 	@Inject
-	@ComponentProperties(margin = false, additionalStyles = "messageinput")
+	@ComponentProperties(margin = true, additionalStyles = "messageinput")
 	private VerticalLayout inputLayout;
 
 
@@ -123,6 +125,7 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	private void addMessageToView(String message, String senderID) {
 		HorizontalLayout messageBox = new HorizontalLayout();
+		messageBox.addStyleName("message");
 		messageBox.setMargin(true);
 		TextArea area = new TextArea();
 		area.setValue(message);

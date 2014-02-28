@@ -1,0 +1,30 @@
+@import "../reindeer/reindeer.scss";
+
+
+
+@mixin radius($radius) {
+  -webkit-border-top-left-radius: $radius;
+  -webkit-border-top-right-radius: $radius;
+  -moz-border-radius-topleft: $radius;
+  -moz-border-radius-topright: $radius;
+  border-top-left-radius: $radius;
+  border-top-right-radius: $radius;
+}
+
+
+@mixin smutalk {
+  @include reindeer;
+
+	.messagebox {
+	padding: 5px;
+	}
+
+	.message{
+	@include radius(10px);
+	background-color: blue;
+	padding: 5px;
+	}
+}
+
+
+
