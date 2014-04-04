@@ -23,7 +23,7 @@ public class MessageReceiver implements MessageListener {
 	public void onMessage(Message arg0) {
 		TextMessage message = (TextMessage) arg0;
 		try {
-			globalState.addMessage(message.getText());
+			globalState.addMessage(message.getText(), message.getStringProperty(MessageSenderService.SENDER_ID));
 		} catch (JMSException e) {
 			LOG.error("sending failed", e);
 		} catch (RuntimeException re) {

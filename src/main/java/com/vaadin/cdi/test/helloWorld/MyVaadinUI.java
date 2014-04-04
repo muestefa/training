@@ -8,12 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.annotations.Push;
+import com.vaadin.annotations.Theme;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.test.annotations.ComponentProperties;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -26,6 +32,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @CDIUI
 @Push
+@Theme("smutalk")
 public class MyVaadinUI extends UI implements MessageListener {
 	private static final Logger LOG = LoggerFactory.getLogger(MyVaadinUI.class);
 
@@ -37,15 +44,18 @@ public class MyVaadinUI extends UI implements MessageListener {
 	@ComponentProperties(margin = false)
 	private VerticalLayout outerLayout;
 	@Inject
-	@ComponentProperties(margin = false, additionalStyles = "message")
+	@ComponentProperties(margin = true, additionalStyles = "messagebox")
 	private VerticalLayout messageLayout;
 	@Inject
-	@ComponentProperties(margin = false, additionalStyles = "messageinput")
+	@ComponentProperties(margin = true, additionalStyles = "messageinput")
 	private VerticalLayout inputLayout;
+
 
 	private Panel messagePanel = new Panel();
 
 	private TextField input;
+
+	private Button addButton;
 
 	@PostConstruct
 	public void init() {
@@ -80,30 +90,50 @@ public class MyVaadinUI extends UI implements MessageListener {
 
 	private void createInput() {
 		input = new TextField();
-		Button button = new Button("Abschicken");
-		button.addClickListener(new Button.ClickListener() {
+		addButton = new Button("Abschicken");
+		addButton.addClickListener(new Button.ClickListener() {
 			public void buttonClick(ClickEvent event) {
 				addMessage(input.getValue());
 				input.setValue("");
+				addButton.setEnabled(false);
+				input.focus();
 			}
 		});
+		addButton.setEnabled(false);
 		inputLayout.addComponent(input);
-		inputLayout.addComponent(button);
+		inputLayout.addComponent(addButton);
+		input.setTextChangeEventMode(TextChangeEventMode.EAGER);
+		input.addTextChangeListener(new FieldEvents.TextChangeListener() {
+			@Override
+			public void textChange(TextChangeEvent event) {
+				if(event.getText().trim().isEmpty()) {
+					addButton.setEnabled(false);
+				} else {
+					addButton.setEnabled(true);
+				}
+			}
+		});
 	}
 
 	private String rebuildMessages() {
 		StringBuilder builder = new StringBuilder();
-		for (String message: globalState.getMessages()) {
-			addMessageToView(message);
+		for (BoardMessage message: globalState.getMessages()) {
+			addMessageToView(message.getMessage(), message.getSenderId());
 		}
 		return builder.toString();
 	}
 
-	private void addMessageToView(String message) {
+	private void addMessageToView(String message, String senderID) {
+		HorizontalLayout messageBox = new HorizontalLayout();
+		messageBox.addStyleName("message");
+		messageBox.setMargin(true);
 		TextArea area = new TextArea();
 		area.setValue(message);
 		area.setReadOnly(true);
-		messageLayout.addComponent(area);
+		messageBox.addComponent(new Label(senderID + ": "));
+		messageBox.addComponent(area);
+		messageLayout.addComponent(messageBox);
+		messagePanel.setScrollTop(1000000);
 	}
 
 	protected void addMessage(String message) {
@@ -111,12 +141,12 @@ public class MyVaadinUI extends UI implements MessageListener {
 	}
 
 	@Override
-	public void messageAdded(final String message) {
-		LOG.debug("received: " + message);
+	public void messageAdded(final BoardMessage message) {
+		LOG.debug("received: " + message.getMessage());
 		access(new Runnable() {
 			@Override
 			public void run() {
-				addMessageToView(message);
+				addMessageToView(message.getMessage(), message.getSenderId());
 				push();
 			}
 		});
