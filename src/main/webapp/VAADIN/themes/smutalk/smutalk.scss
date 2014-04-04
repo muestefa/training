@@ -1,0 +1,30 @@
+@import "../reindeer/reindeer.scss";
+
+$smublue: #00F;
+$smuLightBlue: lighten($smublue, 40%);
+
+
+@mixin radius($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius;
+}
+
+
+@mixin smutalk {
+  @include reindeer;
+
+	.messagebox {
+	padding: 5px;
+	margin-bottom: 5px;
+	}
+
+	.message{
+	@include radius(10px);
+	background-color: $smuLightBlue;
+	padding: 5px;
+	}
+}
+
+
+
