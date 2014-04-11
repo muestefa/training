@@ -2,11 +2,15 @@ package com.vaadin.cdi.test.factory;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 
 import com.vaadin.cdi.test.annotations.ComponentProperties;
 import com.vaadin.ui.VerticalLayout;
 
 public class ComponentFactory {
+
+    @Inject
+    private UserLocale userLocale;
 
 	@Produces
 	public VerticalLayout buildLayout(InjectionPoint injectionPoint) {
